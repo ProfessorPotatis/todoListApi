@@ -1,0 +1,203 @@
+RESTful API design with Node.js
+
+FIRST: Install Node.js from: nodejs.org
+
+-------------------------------
+
+Basic setup
+
+In the Terminal:
+1. Create a folder name todoListApi - mkdir todoListApi.
+2. Navigate to the root of your newly created folder - cd todoListApi.
+3. Create a package.json file - npm init.
+    name: todolistapi
+    description: Restful todoListApi
+    main: app.js
+    repository: (add a private repository on GitHub)
+
+4. Create a file called server.js - touch server.js.
+This file will hold the protocols to create our server.
+
+5. Create a folder called api - mkdir api.
+Inside this folder, create three separate folders called models,
+routes and controllers by running
+- mkdir api/controllers api/models api/routes
+
+6. Create todoListController.js in the api/controllers folder,
+todoListRoutes.js in the routes folder, and todoListModel in the model folder.
+- touch api/controllers/todoListController.js
+api/models/todoListModel.js
+api/routes/todoListRoutes.js
+
+7. Install Express in the todoListApi folder.
+- npm install express --save
+
+8. In package.json add:
+"start": "node server.js"
+under scripts and test.
+
+9. Open the server.js file and copy the code:
+/* jshint esversion: 6 */
+
+let express = require('express'),
+  app = express(),
+  port = process.env.PORT || 3000;
+
+app.listen(port);
+
+console.log('todo list RESTful API server started on: ' + port);
+
+10. To run the server either type:
+- npm run start
+- node server.js
+
+----------------------------------------
+
+Install mongoose and set up database
+
+1. Install mongoose - npm install mongoose --save
+
+2. Open the todoListModel.js file in your api/models folder
+and type the following code:
+/* jshint esversion: 6 */
+
+let mongoose = require('mongoose');
+let Schema = mongoose.Schema;
+
+
+let TaskSchema = new Schema({
+  name: {
+    type: String,
+    required: 'Kindly enter the name of the task'
+  },
+  Created_date: {
+    type: Date,
+    default: Date.now
+  },
+  status: {
+    type: [{
+      type: String,
+      enum: ['pending', 'ongoing', 'completed']
+    }],
+    default: ['pending']
+  }
+});
+
+module.exports = mongoose.model('Tasks', TaskSchema);
+
+----------------------------------------
+
+Set up the routes
+
+1. Open the todoListRoutes.js file in the routes folder and
+type the following code:
+/* jshint esversion: 6 */
+
+module.exports = function(app) {
+  let todoList = require('../controllers/todoListController');
+
+  // todoList Routes
+  app.route('/tasks')
+    .get(todoList.list_all_tasks)
+    .post(todoList.create_a_task);
+
+
+  app.route('/tasks/:taskId')
+    .get(todoList.read_a_task)
+    .put(todoList.update_a_task)
+    .delete(todoList.delete_a_task);
+};
+
+----------------------------------------
+
+Set up the controller
+
+1. Open todoListController.js file and type the following code:
+/* jshint esversion: 6 */
+
+let mongoose = require('mongoose'),
+  Task = mongoose.model('Tasks');
+
+exports.list_all_tasks = function(req, res) {
+  Task.find({}, function(err, task) {
+    if (err)
+      res.send(err);
+    res.json(task);
+  });
+};
+
+
+exports.create_a_task = function(req, res) {
+  var new_task = new Task(req.body);
+  new_task.save(function(err, task) {
+    if (err)
+      res.send(err);
+    res.json(task);
+  });
+};
+
+
+exports.read_a_task = function(req, res) {
+  Task.findById(req.params.taskId, function(err, task) {
+    if (err)
+      res.send(err);
+    res.json(task);
+  });
+};
+
+
+exports.update_a_task = function(req, res) {
+  Task.findOneAndUpdate({_id: req.params.taskId}, req.body, {new: true}, function(err, task) {
+    if (err)
+      res.send(err);
+    res.json(task);
+  });
+};
+
+
+exports.delete_a_task = function(req, res) {
+  Task.remove({
+    _id: req.params.taskId
+  }, function(err, task) {
+    if (err)
+      res.send(err);
+    res.json({ message: 'Task successfully deleted' });
+  });
+};
+
+----------------------------------------
+
+Put it all together
+
+1. Install body-parser - npm install body-parser --save
+
+2. Open server.js and type:
+
+let express = require('express'),
+  app = express(),
+  port = process.env.PORT || 3000,
+  mongoose = require('mongoose'),
+  Task = require('./api/models/todoListModel'), //created model loading here
+  bodyParser = require('body-parser');
+
+// mongoose instance connection url connection
+mongoose.Promise = global.Promise;
+mongoose.connect('mongodb://localhost/Tododb');
+
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+
+let routes = require('./api/routes/todoListRoutes'); //importing route
+routes(app); //register the route
+
+
+app.listen(port);
+
+
+console.log('todo list RESTful API server started on: ' + port);
+
+3. Open another Terminal window and go to the todoListApi folder.
+
+4. Start MongoDB Server by typing - sudo mongod
