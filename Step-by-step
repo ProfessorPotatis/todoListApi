@@ -201,3 +201,10 @@ console.log('todo list RESTful API server started on: ' + port);
 3. Open another Terminal window and go to the todoListApi folder.
 
 4. Start MongoDB Server by typing - sudo mongod
+
+----------------------------------------
+
+Test the API with Postman and Newman
+
+Follow the guide here, make sure to read the whole guide:
+https://scotch.io/tutorials/write-api-tests-with-postman-and-newman
