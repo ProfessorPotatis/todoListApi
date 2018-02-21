@@ -5,7 +5,8 @@ let express = require('express'),
     port = process.env.PORT || 3000,
     mongoose = require('mongoose'),
     Task = require('./api/models/todoListModel'), //created model loading here
-    bodyParser = require('body-parser');
+    bodyParser = require('body-parser'),
+    cors = require('cors');
 
 // mongoose instance connection url connection
 mongoose.Promise = global.Promise;
@@ -14,6 +15,7 @@ mongoose.connect('mongodb://localhost/Tododb');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cors());
 
 
 let routes = require('./api/routes/todoListRoutes'); //importing route

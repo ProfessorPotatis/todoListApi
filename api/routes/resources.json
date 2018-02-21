@@ -1,0 +1,13 @@
+{
+  "tasks": {
+    "name": "Tasks",
+    "description": "Gets and creates new tasks.",
+    "port": 3000,
+    "url": "/tasks",
+    "links": {
+        "name": "Task",
+        "description": "Read, update or delete task.",
+        "url": "/tasks/:taskId"
+    }
+  }
+}
